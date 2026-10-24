@@ -1,0 +1,6 @@
+fastapi>=0.115
+uvicorn[standard]>=0.32
+anthropic>=1.0
+voyageai>=0.3
+numpy>=1.26
+python-dotenv>=1.0

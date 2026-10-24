@@ -1,0 +1,4 @@
+-r requirements.txt
+yt-dlp>=2024.0.0
+# Your existing MCP package, installed from the local checkout (editable).
+-e /Users/one/projects/youtube-transcript-mcp
