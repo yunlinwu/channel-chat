@@ -72,13 +72,23 @@ def _throttle(tokens: int) -> None:
     _last_request = time.monotonic()
 
 
-def embed_texts(texts: list[str], input_type: str, verbose: bool = False) -> np.ndarray:
+def embed_texts(
+    texts: list[str],
+    input_type: str,
+    verbose: bool = False,
+    throttle: bool = True,
+) -> np.ndarray:
     """
     Embed a list of texts.
 
     input_type matters and is not cosmetic: Voyage embeds a corpus chunk and a
     search query differently. Use "document" when indexing, "query" when asking.
     Getting this backwards quietly degrades retrieval.
+
+    throttle=True paces requests to stay inside the free-tier limits. That is
+    right for bulk ingest, but WRONG in a request path: it would make every user
+    query wait out the 3 RPM spacing even when nothing is competing for it. Serving
+    code passes throttle=False and relies on the retry below if it ever is limited.
 
     Returns an (n, dims) float32 array, L2-normalized so cosine similarity is
     just a dot product.
@@ -90,8 +100,8 @@ def embed_texts(texts: list[str], input_type: str, verbose: bool = False) -> np.
     vectors: list[list[float]] = []
 
     for i, group in enumerate(groups, 1):
-        tokens = sum(_est_tokens(t) for t in group)
-        _throttle(tokens)
+        if throttle:
+            _throttle(sum(_est_tokens(t) for t in group))
 
         for attempt in range(6):
             try:

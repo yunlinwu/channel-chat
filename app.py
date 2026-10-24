@@ -100,7 +100,7 @@ def client_ip(request: Request) -> str:
 
 
 def retrieve(question: str) -> list[dict]:
-    qvec = embed_texts([question], input_type="query")[0]
+    qvec = embed_texts([question], input_type="query", throttle=False)[0]
     scores = VECTORS @ qvec  # normalized vectors, so dot == cosine
     top = np.argsort(scores)[::-1][:TOP_K]
     out = []
